@@ -58,9 +58,18 @@ router.put('/:id', validateUserId, validateUser, async (req, res) => {
   }
 });
 
-router.delete('/:id', (req, res) => {
-  // RETURN THE FRESHLY DELETED USER OBJECT
-  // this needs a middleware to verify user id
+router.delete('/:id', validateUserId, async (req, res) => {
+  try {
+    const deletedUser = await Users.remove(req.params.id)
+    res.status(204).json(deletedUser)
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({
+      error: "Uh oh something went wrong"
+    })
+  }
+  
+
 });
 
 router.get('/:id/posts', (req, res) => {
