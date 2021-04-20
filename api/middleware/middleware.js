@@ -9,6 +9,20 @@ function logger(req, res, next) {
 
 function validateUserId(req, res, next) {
   // DO YOUR MAGIC
+  Users.getById(req.params.id)
+  .then(user => {
+    if (user) {
+      req.user = user
+      next()
+    } else {
+      res.status(404).json({ message: "Unable to find user" })
+    }
+  })
+  .catch(error => {
+    res.status(500).json({
+      message: "Uh oh something happened", error
+    })
+  })
 }
 
 function validateUser(req, res, next) {
@@ -22,5 +36,6 @@ function validatePost(req, res, next) {
 // do not forget to expose these functions to other modules
 module.exports = {
   logger,
-
+  validateUserId,
+  
 }
