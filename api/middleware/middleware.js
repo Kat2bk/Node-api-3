@@ -12,7 +12,7 @@ function validateUserId(req, res, next) {
   Users.getById(req.params.id)
   .then(user => {
     if (user) {
-      req.user = user
+      req.user = req.params.id
       next()
     } else {
       res.status(404).json({ message: "Unable to find user" })
@@ -28,16 +28,26 @@ function validateUserId(req, res, next) {
 function validateUser(req, res, next) {
   const {name} = req.body;
 
+  //if (req.body && req.body.name) 
+
   //Object.entries(req.body).length === 0 ?
   if (!name.trim()) {
     res.status(400).json({ messsage: "Missing required name field"})
   } else {
     next()
   }
+  
 }
 
 function validatePost(req, res, next) {
-  // DO YOUR MAGIC
+
+  if (req.params.id && req.body.text) {
+    next()
+  } else if (req.body.user_id && !req.body.text) {
+    res.status(400).json({ message: "Missing required text field"})
+  } else {
+    res.status(500).json({ error: "Uh oh something happened"})
+  }
 }
 
 // do not forget to expose these functions to other modules
@@ -45,5 +55,5 @@ module.exports = {
   logger,
   validateUserId,
   validateUser,
-
+  validatePost
 }

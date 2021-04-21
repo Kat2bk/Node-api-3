@@ -1,6 +1,7 @@
 const express = require('express');
 const Users = require('./users-model');
-const {validateUserId, validateUser} = require('../middleware/middleware');
+const {validateUserId, validateUser, validatePost} = require('../middleware/middleware');
+const Posts = require('../posts/posts-model');
 
 // You will need `users-model.js` and `posts-model.js` both
 // The middleware functions also need to be required
@@ -68,8 +69,37 @@ router.delete('/:id', validateUserId, async (req, res) => {
       error: "Uh oh something went wrong"
     })
   }
-  
+});
 
+router.get('/:id/posts', validateUserId, async (req, res) => {
+  // RETURN THE ARRAY OF USER POSTS
+  // this needs a middleware to verify user id
+  try {
+      const userPosts = await Users.getUserPosts(req.params.id)
+      res.status(200).json(userPosts)
+  } catch (error) {
+      console.log(error)
+      res.status(500).json({
+          message: "Uh oh something went wrong", error
+      })
+  }
+});
+
+router.post('/:id/posts', validateUserId, validatePost, async (req, res) => {
+  const newPost = {
+    user_id: req.params.id,
+    text: req.body.text
+  }
+  
+  try {
+    const userPost = await Posts.insert(newPost)
+    res.status(201).json(userPost)
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({
+      message: "Uh oh something went wrong", error
+  })
+  }
 });
 
 module.exports = router;
