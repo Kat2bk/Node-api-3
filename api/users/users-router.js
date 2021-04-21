@@ -5,10 +5,11 @@ const Posts = require('../posts/posts-model');
 
 // You will need `users-model.js` and `posts-model.js` both
 // The middleware functions also need to be required
+const {BaseError} = require('../middleware/errorMiddleware');
 
 const router = express.Router();
 
-router.get('/', async (req, res) => {
+router.get('/', async (req, res, next) => {
   // RETURN AN ARRAY WITH ALL THE USERS
  
   try {
@@ -20,71 +21,58 @@ router.get('/', async (req, res) => {
 
 });
 
-router.get('/:id', validateUserId, async (req, res) => {
+router.get('/:id', validateUserId, async (req, res, next) => {
   // RETURN THE USER OBJECT
   // this needs a middleware to verify user id
   try {
     const user = await Users.getById(req.params.id)
     res.status(200).json(user)
   } catch (error) {
-    res.status(500).json({
-      error: "Uh oh something went wrong"
-    })
+    next(error)
   }
 });
 
-router.post('/', validateUser, async (req, res) => {
+router.post('/', validateUser, async (req, res, next) => {
   // RETURN THE NEWLY CREATED USER OBJECT
   // this needs a middleware to check that the request body is valid
   try {
     const newUser = await Users.insert(req.body)
     res.status(201).json(newUser)
   } catch (error) {
-    res.status(500).json({
-      error: "Uh oh something went wrong"
-    })
+    next(error)
   }
 });
 
-router.put('/:id', validateUserId, validateUser, async (req, res) => {
+router.put('/:id', validateUserId, validateUser, async (req, res, next) => {
   try {
     const updatedUser = await Users.update(req.params.id, req.body)
     res.status(200).json(updatedUser)
   } catch (error) {
-    console.log(error)
-    res.status(500).json({
-      error: "Uh oh something went wrong"
-    })
+    next(error)
   }
 });
 
-router.delete('/:id', validateUserId, async (req, res) => {
+router.delete('/:id', validateUserId, async (req, res, next) => {
   try {
     const deletedUser = await Users.remove(req.params.id)
     res.status(204).json(deletedUser)
   } catch (error) {
-    console.log(error)
-    res.status(500).json({
-      error: "Uh oh something went wrong"
-    })
+    next(error)
   }
 });
 
-router.get('/:id/posts', validateUserId, async (req, res) => {
+router.get('/:id/posts', validateUserId, async (req, res, next) => {
   // RETURN THE ARRAY OF USER POSTS
   // this needs a middleware to verify user id
   try {
       const userPosts = await Users.getUserPosts(req.params.id)
       res.status(200).json(userPosts)
   } catch (error) {
-      console.log(error)
-      res.status(500).json({
-          message: "Uh oh something went wrong", error
-      })
+      next(error)
   }
 });
 
-router.post('/:id/posts', validateUserId, validatePost, async (req, res) => {
+router.post('/:id/posts', validateUserId, validatePost, async (req, res, next) => {
   const newPost = {
     user_id: req.params.id,
     text: req.body.text
@@ -94,10 +82,7 @@ router.post('/:id/posts', validateUserId, validatePost, async (req, res) => {
     const userPost = await Posts.insert(newPost)
     res.status(201).json(userPost)
   } catch (error) {
-    console.log(error)
-    res.status(500).json({
-      message: "Uh oh something went wrong", error
-  })
+    next(error)
   }
 });
 

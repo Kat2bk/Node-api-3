@@ -1,4 +1,5 @@
 const Users = require('../users/users-model');
+const {BaseError} = require('./errorMiddleware');
 
 function logger(req, res, next) {
   // DO YOUR MAGIC
@@ -15,13 +16,12 @@ function validateUserId(req, res, next) {
       req.user = req.params.id
       next()
     } else {
-      res.status(404).json({ message: "Unable to find user" })
+      // res.status(404).json({ message: "Unable to find user" })
+      throw new BaseError(404, 'Unable to find user')
     }
   })
   .catch(error => {
-    res.status(500).json({
-      message: "Uh oh something happened", error
-    })
+    next(error)
   })
 }
 
@@ -32,11 +32,10 @@ function validateUser(req, res, next) {
 
   //Object.entries(req.body).length === 0 ?
   if (!name.trim()) {
-    res.status(400).json({ messsage: "Missing required name field"})
+    throw new BaseError(400, 'Missing required name field')
   } else {
     next()
-  }
-  
+  } 
 }
 
 function validatePost(req, res, next) {
@@ -44,9 +43,9 @@ function validatePost(req, res, next) {
   if (req.params.id && req.body.text) {
     next()
   } else if (req.body.user_id && !req.body.text) {
-    res.status(400).json({ message: "Missing required text field"})
+    throw new BaseError(400, 'Missing required text field')
   } else {
-    res.status(500).json({ error: "Uh oh something happened"})
+    throw new BaseError(500, 'Something happened with the server, try again')
   }
 }
 
