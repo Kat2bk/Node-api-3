@@ -4,6 +4,7 @@ const server = express();
 const {logger} = require('./api/middleware/middleware');
 const usersRouter = require('./api/users/users-router');
 // const postsRouter = require('./api/posts/postsRouter');
+const {handleError} = require('./api/middleware/errorMiddleware');
 
 //portRouter, userRouter, middleware
 server.use(express.json());
@@ -17,6 +18,9 @@ server.get('/', (req, res) => {
 })
 
 // error middleware
+server.use((err, req, res, next) => {
+    handleError(err, res);
+})
 
 module.exports = server;  
 

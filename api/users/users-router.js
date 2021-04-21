@@ -10,13 +10,12 @@ const router = express.Router();
 
 router.get('/', async (req, res) => {
   // RETURN AN ARRAY WITH ALL THE USERS
+ 
   try {
     const users = await Users.get()
     res.status(200).json(users)
   } catch (error) {
-    res.status(500).json({
-      error: "Uh oh something went wrong"
-    })
+    next(error)
   }
 
 });
@@ -90,7 +89,7 @@ router.post('/:id/posts', validateUserId, validatePost, async (req, res) => {
     user_id: req.params.id,
     text: req.body.text
   }
-  
+
   try {
     const userPost = await Posts.insert(newPost)
     res.status(201).json(userPost)
